@@ -1,6 +1,7 @@
 // compile: g++ -std=c++11 -o pointers pointers.cpp
 #include <iostream>
 #include <string>
+#include <math.h>
 
 typedef struct Student {
     int id;
@@ -12,19 +13,18 @@ typedef struct Student {
 
 int promptInt(std::string message, int min, int max);
 double promptDouble(std::string message, double min, double max);
-void calculateStudentAverage(int *object, double *avg);
+void calculateStudentAverage(void *object, double *avg);
 
 int main(int argc, char **argv)
 {
     Student student;
     double average;
-    char *last;
-    char *first;
     std::string out;
     int i;
 
     student.f_name = new char[128];
     student.l_name = new char[128];
+    student.grades = new double[1000];
 
     // Sequence of user input -> store in fields of `student`
     student.id = promptInt("Please enter the student's id number: ", 0, 999999999);
@@ -33,7 +33,7 @@ int main(int argc, char **argv)
     std::cout << "Please enter the student's last name: ";
     std::cin.ignore();
     std::cin.getline(student.l_name, 128);
-    student.n_assignments = promptInt("Please enter how many assignments were graded: ", 0, 134217728);
+    student.n_assignments = promptInt("Please enter how many assignments were graded: ", 1, 134217728);
 
     for(i = 0; i < student.n_assignments; i++)
     {
@@ -53,18 +53,17 @@ int main(int argc, char **argv)
     void *voidPointer;
     numGradesPointer = &student.n_assignments;
 
-    //voidPointer = (void*)numGradesPointer;
-    std::cout << "numGradesPointer in main " << *numGradesPointer << "\n";
-
     calculateStudentAverage(numGradesPointer, student.grades);
 
     // Output `average`
     average = *student.grades;
 
-    std::cout << "Student " << student.f_name << " " << student.l_name << " [" << student.id << "]\n";
-    std::cout << "Average grade: " << average << "\n"; 
-    std::cout << "All done: \n"; 
+    //round average
+    average = floor(average * 10 + .5) / 10;
 
+    std::cout << "Student: " << student.f_name << " " << student.l_name << " [" << student.id << "]\n";
+    std::cout << "\tAverage grade: " << average << "\n"; 
+    
     return 0;
 }
 
@@ -84,7 +83,7 @@ int promptInt(std::string message, int min, int max)
     result = atoi(tempResult);
     while(result < min || result > max)
     {
-        std::cout << "Sorry, I cannot understand your answer";
+        std::cout << "Sorry, I cannot understand your answer\n";
         std::cout << message;
         std::cin.ignore();
         std::cin.getline(tempResult, max);
@@ -110,7 +109,7 @@ double promptDouble(std::string message, double min, double max)
     result = std::stod(tempResult);
     while(result < min || result > max)
     {
-        std::cout << "Sorry, I cannot understand your answer";
+        std::cout << "Sorry, I cannot understand your answer\n";
         std::cout << message;
         std::cin.ignore();
         std::cin.getline(tempResult, max);
@@ -124,24 +123,17 @@ double promptDouble(std::string message, double min, double max)
    object: pointer to anything - your choice! (but choose something that will be helpful)
    avg: pointer to a double (can store a value here)
 */
-void calculateStudentAverage(int *object, double *avg)
+void calculateStudentAverage(void *object, double *avg)
 {
     // Code to calculate and store average grade
     // Get the *grades double and divide that by n_assignments both from student
     // reassign *grades to the average as that is the only one that is a double which the answer must be
-    double totalGrades;
-    double average;
-    double numGrades;
-    int holdInt;
+    int numGrades = 0;
+    double average = 0;
 
-    average = 0;
-    holdInt = 0;
+    int *voidInt = (int*)object;
 
-    totalGrades = *avg;
-    holdInt = *object;
-    numGrades = (double)holdInt;
-
-    average = totalGrades / numGrades;
+    average = *avg / *voidInt;
 
     *avg = average;
 
